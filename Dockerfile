@@ -1,15 +1,25 @@
 # ════════════════════════════════════════════════
-# FOKOS EVENTOS — Railway (PHP 8.2 built-in server)
+# FOKOS EVENTOS — Railway (Nginx + PHP-FPM)
 # ════════════════════════════════════════════════
-FROM php:8.2-cli
+FROM php:8.2-fpm-alpine
 
+# Extensões
 RUN docker-php-ext-install pdo pdo_mysql
 
-COPY . /app
-WORKDIR /app
+# Nginx
+RUN apk add --no-cache nginx
 
-RUN mkdir -p public/uploads && chmod 777 public/uploads
+# Config Nginx
+RUN mkdir -p /run/nginx
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 
-EXPOSE ${PORT:-8080}
+# App
+COPY . /var/www/html
+WORKDIR /var/www/html
+RUN mkdir -p public/uploads && chown -R www-data:www-data public/uploads
 
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} router.php"]
+# Startup: Nginx + PHP-FPM
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]
