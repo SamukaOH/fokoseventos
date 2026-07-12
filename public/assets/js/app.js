@@ -14,6 +14,8 @@ var Api = {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       if (!res.ok) return null;
+      var ct = res.headers.get('content-type') || '';
+      if (!ct.includes('json')) { location.reload(); return null; }
       return await res.json();
     } catch(e) { return null; }
   },

@@ -238,6 +238,13 @@ function setTipo(t) {
   document.getElementById('btn-tipo-despesa').classList.toggle('active', t==='despesa');
 }
 
+// Helper: parseia JSON ou recarrega se a sessão expirou
+async function safeJson(r) {
+  var ct = r.headers.get('content-type') || '';
+  if (!ct.includes('json')) { location.reload(); throw new Error('sessao'); }
+  return r.json();
+}
+
 async function carregarDados() {
   document.getElementById('fin-tabela').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</div>';
   var params = 'modo='+MODO;
@@ -247,7 +254,7 @@ async function carregarDados() {
   try {
     var r = await fetch(APP_URL+'/api/financeiro?'+params, {headers:{'X-Requested-With':'XMLHttpRequest'}});
     if (!r.ok) throw new Error('HTTP '+r.status);
-    var json = await r.json();
+    var json = await safeJson(r);
     if (json.erro) throw new Error(json.erro);
     DADOS = json;
     renderCards();
@@ -257,6 +264,7 @@ async function carregarDados() {
     renderDemandas(DADOS.demandas||[]);
     carregarPrecos();
   } catch(e) {
+    if(e && e.message && e.message.includes('Unexpected token')) { console.warn('Financeiro: sessão expirada ou resposta inválida — recarregando...'); location.reload(); return; }
     console.error('Financeiro erro:', e);
     document.getElementById('fin-tabela').innerHTML = '<div style="padding:40px;text-align:center;color:#ff3b30"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao carregar: '+e.message+'</div>';
   }
@@ -435,7 +443,7 @@ async function calcularOrcamento() {
   if (!id) return;
   try {
     var r = await fetch(APP_URL+'/api/financeiro/orcamento/'+id, {headers:{'X-Requested-With':'XMLHttpRequest'}});
-    var data = await r.json();
+    var data = await safeJson(r);
     if (data.erro) { alert(data.erro); return; }
     var linhas = data.linhas || [];
     var html = linhas.map(function(l) {
@@ -493,7 +501,7 @@ async function salvarLancamento() {
   fd.append('orcamento_auto', document.getElementById('linhas-orcamento').style.display!=='none'?1:0);
   try {
     var r = await fetch(APP_URL+'/api/financeiro', {method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
-    var data = await r.json();
+    var data = await safeJson(r);
     if (data.sucesso) {
       Modal.close('modal-lancamento');
       Toast.success('Lançamento salvo! Valor final: '+moeda(data.valor_final));
@@ -524,7 +532,7 @@ async function deletarLan(id) {
   var fd = new FormData(); fd.append('_csrf',CSRF);
   try {
     var r = await fetch(APP_URL+'/api/financeiro/'+id+'/delete',{method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
-    var data = await r.json();
+    var data = await safeJson(r);
     if (data.sucesso) { Toast.success('Removido!'); carregarDados(); }
   } catch(e) {}
 }
@@ -532,7 +540,7 @@ async function deletarLan(id) {
 async function carregarPrecos() {
   try {
     var r = await fetch(APP_URL+'/api/financeiro/precos',{headers:{'X-Requested-With':'XMLHttpRequest'}});
-    var data = await r.json();
+    var data = await safeJson(r);
     var lista = data.precos||[];
     var html = lista.length
       ? lista.map(function(p){
@@ -553,7 +561,7 @@ async function salvarPreco(id) {
   fd.append('preco_unitario', document.getElementById('preco-'+id).value);
   try {
     var r = await fetch(APP_URL+'/api/financeiro/precos/'+id,{method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
-    var data = await r.json();
+    var data = await safeJson(r);
     if (data.sucesso) Toast.success('Preço atualizado!');
   } catch(e) {}
 }
