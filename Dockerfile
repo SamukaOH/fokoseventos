@@ -1,23 +1,15 @@
 # ════════════════════════════════════════════════
-# FOKOS EVENTOS — Railway (PHP 8.2 + Apache)
+# FOKOS EVENTOS — Railway (PHP 8.2 built-in server)
 # ════════════════════════════════════════════════
-FROM php:8.2-apache
+FROM php:8.2-cli
 
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Forçar apenas 1 MPM: deletar configs conflitantes na marra
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.conf \
-          /etc/apache2/mods-enabled/mpm_event.load \
-          /etc/apache2/mods-enabled/mpm_worker.conf \
-          /etc/apache2/mods-enabled/mpm_worker.load \
- && ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/ \
- && ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/ \
- && ln -sf /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/
+COPY . /app
+WORKDIR /app
 
-RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+RUN mkdir -p public/uploads && chmod 777 public/uploads
 
-COPY . /var/www/html/
-RUN mkdir -p /var/www/html/public/uploads \
- && chown -R www-data:www-data /var/www/html/public/uploads
+EXPOSE ${PORT:-8080}
 
-CMD ["sh", "-c", "sed -i \"s/Listen 80/Listen ${PORT:-80}/\" /etc/apache2/ports.conf && sed -i \"s/:80>/:${PORT:-80}>/\" /etc/apache2/sites-available/000-default.conf && apache2-foreground"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} router.php"]
