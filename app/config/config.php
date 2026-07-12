@@ -4,7 +4,7 @@
 // ============================================================
 
 define('APP_NAME',    'Fokos Eventos');
-define('APP_VERSION', '7.0.0');
+define('APP_VERSION', '7.0.1');
 
 // URL: usa APP_URL do ambiente (Railway) ou o domínio público da Railway; fallback XAMPP
 $envUrl = getenv('APP_URL');
