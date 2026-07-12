@@ -1,14 +1,12 @@
 <?php
 // ============================================================
 // FOKOS EVENTOS — Instalador do banco (Railway)
-// Uso ÚNICO: /setup.php?key=SUA_SETUP_KEY
 // ============================================================
 require_once __DIR__ . '/app/config/config.php';
-
 header('Content-Type: text/plain; charset=utf-8');
 
 $key = getenv('SETUP_KEY');
-if (!$key) { http_response_code(403); die("SETUP_KEY não configurada no ambiente.\n"); }
+if (!$key) { http_response_code(403); die("SETUP_KEY não configurada.\n"); }
 if (($_GET['key'] ?? '') !== $key) { http_response_code(403); die("Chave inválida.\n"); }
 
 try {
@@ -23,62 +21,73 @@ try {
 
 $tabelas = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
 if (count($tabelas) > 0 && !isset($_GET['force'])) {
-    die("O banco já possui " . count($tabelas) . " tabelas — instalação abortada.\nPara forçar reinstalação: adicione &force na URL (vai apagar tudo e recriar).\n");
+    die("Banco tem " . count($tabelas) . " tabelas. Adicione &force para apagar e recriar.\n");
 }
-if (count($tabelas) > 0 && isset($_GET['force'])) {
+if (count($tabelas) > 0) {
     $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
-    foreach ($tabelas as $t) { $pdo->exec("DROP TABLE `{$t}`"); }
+    foreach ($tabelas as $t) $pdo->exec("DROP TABLE `{$t}`");
     $pdo->exec("SET FOREIGN_KEY_CHECKS=1");
     echo "Tabelas antigas removidas (" . count($tabelas) . ").\n";
 }
 
 $sqlFile = __DIR__ . '/instalacao_completa.sql';
-if (!file_exists($sqlFile)) { http_response_code(500); die("instalacao_completa.sql não encontrado.\n"); }
+if (!file_exists($sqlFile)) die("instalacao_completa.sql não encontrado.\n");
 
-$sql = file_get_contents($sqlFile);
+$raw = file_get_contents($sqlFile);
 
-// Remover comandos de criação/uso de database (Railway já fornece o schema)
-$sql = preg_replace('/^\s*(CREATE DATABASE|USE)\b.*?;/mi', '', $sql);
+// Limpar: remover CREATE DATABASE / USE, e IF NOT EXISTS em ALTER
+$raw = preg_replace('/^\s*(CREATE DATABASE|USE)\b.*?;/mi', '', $raw);
+$raw = preg_replace('/ADD COLUMN IF NOT EXISTS/i', 'ADD COLUMN', $raw);
+$raw = preg_replace('/ADD IF NOT EXISTS/i', 'ADD COLUMN', $raw);
 
-// Remover "IF NOT EXISTS" de ALTER TABLE ADD COLUMN (não suportado em MySQL 5.7/8.0 padrão)
-$sql = preg_replace('/ADD COLUMN IF NOT EXISTS/i', 'ADD COLUMN', $sql);
-$sql = preg_replace('/ADD IF NOT EXISTS/i', 'ADD COLUMN', $sql);
+// Separar em statements: linha por linha, acumulando até encontrar ";"
+$lines = explode("\n", $raw);
+$statements = [];
+$buffer = '';
+foreach ($lines as $line) {
+    $trimmed = trim($line);
+    // Pular linhas vazias e comentários puros
+    if ($trimmed === '' || strpos($trimmed, '--') === 0) continue;
+    $buffer .= $line . "\n";
+    // Se a linha termina com ";" (fora de string), é fim do statement
+    if (preg_match('/;\s*$/', $trimmed)) {
+        $statements[] = trim($buffer);
+        $buffer = '';
+    }
+}
+if (trim($buffer)) $statements[] = trim($buffer);
 
-// Separar por ";" e executar um por um (PDO::exec não suporta multi-statement em todos os drivers)
-$statements = preg_split('/;\s*$/m', $sql);
 $executed = 0;
 $errors = [];
 
 foreach ($statements as $stmt) {
-    $stmt = trim($stmt);
-    if ($stmt === '' || strpos($stmt, '--') === 0) continue;
+    if ($stmt === '') continue;
     try {
         $pdo->exec($stmt);
         $executed++;
     } catch (PDOException $e) {
         $msg = $e->getMessage();
-        // Ignorar erros de "coluna já existe" ou "tabela já existe" (migrações idempotentes)
-        if (strpos($msg, 'Duplicate column') !== false
-         || strpos($msg, 'already exists') !== false
-         || strpos($msg, '1060') !== false
-         || strpos($msg, '1050') !== false) {
-            continue;
-        }
-        $errors[] = substr($stmt, 0, 80) . '... → ' . $msg;
+        // Ignorar erros de duplicação (migrações idempotentes)
+        if (preg_match('/1060|1050|1061|already exists|Duplicate/i', $msg)) continue;
+        $errors[] = mb_substr($stmt, 0, 60) . '... → ' . $msg;
     }
 }
 
 $total = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
-echo "✓ Instalação concluída!\n";
-echo "Tabelas criadas: " . count($total) . "\n";
-echo "Statements executados: {$executed}\n";
+echo "\n✓ Instalação concluída!\n";
+echo "Tabelas: " . count($total) . "\n";
+echo "Statements: {$executed}\n";
 
-$users = $pdo->query("SELECT email, tipo FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
-foreach ($users as $u) echo "  usuário: {$u['email']} ({$u['tipo']})\n";
-
-if ($errors) {
-    echo "\n⚠ Avisos (" . count($errors) . "):\n";
-    foreach ($errors as $e) echo "  · {$e}\n";
+try {
+    $users = $pdo->query("SELECT email, tipo FROM usuarios ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($users as $u) echo "  → {$u['email']} ({$u['tipo']})\n";
+} catch (PDOException $e) {
+    echo "⚠ Não foi possível listar usuários: " . $e->getMessage() . "\n";
 }
 
-echo "\nPor segurança, remova o setup.php ou troque a SETUP_KEY.\n";
+if ($errors) {
+    echo "\n⚠ Erros (" . count($errors) . "):\n";
+    foreach (array_slice($errors, 0, 10) as $e) echo "  · {$e}\n";
+}
+
+echo "\nRemova o setup.php ou troque a SETUP_KEY.\n";
