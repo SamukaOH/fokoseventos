@@ -38,6 +38,8 @@ $raw = file_get_contents($sqlFile);
 // Limpar: remover CREATE DATABASE / USE, e IF NOT EXISTS em ALTER
 $raw = preg_replace('/^\s*(CREATE DATABASE|USE)\b.*?;/mi', '', $raw);
 $raw = preg_replace('/ADD COLUMN IF NOT EXISTS/i', 'ADD COLUMN', $raw);
+$raw = preg_replace('/ADD FOREIGN KEY IF NOT EXISTS/i', 'ADD FOREIGN KEY', $raw);
+$raw = preg_replace('/ADD INDEX IF NOT EXISTS/i', 'ADD INDEX', $raw);
 $raw = preg_replace('/ADD IF NOT EXISTS/i', 'ADD COLUMN', $raw);
 
 // Separar em statements: linha por linha, acumulando até encontrar ";"

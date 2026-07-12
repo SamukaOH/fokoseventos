@@ -1,0 +1,17 @@
+{
+  "name": "Fokos Eventos",
+  "short_name": "Fokos",
+  "description": "Sistema de gestão para eventos e logística",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D0E12",
+  "theme_color": "#0D0E12",
+  "icons": [
+    {
+      "src": "/public/assets/img/logo-small.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
