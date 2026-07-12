@@ -336,3 +336,36 @@ document.addEventListener('click', function(e) {
   };
   Modal.open(id);
 });
+
+
+// ═══════════ Transição Apple entre páginas ═══════════
+(function(){
+  var pages = ['dashboard','demandas','estoque','financeiro','motoristas',
+               'calendario','clientes','relatorios','usuarios','logs'];
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a) return;
+    var href = a.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript') || a.target === '_blank') return;
+    // Só animar navegação interna entre páginas
+    var isPage = pages.some(function(p){ return href.endsWith('/'+p) || href === APP_URL+'/'+p; });
+    var isBnav = a.closest('.bottom-nav, .bnav-item, .nav-item');
+    if (!isPage && !isBnav) return;
+    // Verificar se é link para mesma página
+    if (href === window.location.href || href === window.location.pathname) return;
+    e.preventDefault();
+    var mc = document.querySelector('.main-content');
+    if (!mc) { window.location.href = href; return; }
+    mc.classList.add('fk-page-out');
+    setTimeout(function(){
+      window.location.href = href;
+    }, 180);
+  });
+  // Entrada: animar o conteúdo ao carregar
+  window.addEventListener('DOMContentLoaded', function(){
+    var mc = document.querySelector('.main-content');
+    if (mc && !mc.classList.contains('fk-page-out')) {
+      mc.classList.add('fk-page-in');
+    }
+  });
+})();

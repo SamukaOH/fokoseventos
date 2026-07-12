@@ -122,6 +122,14 @@ button, input, select, textarea { font-family:var(--font); }
 :focus-visible { box-shadow:var(--ring) !important; border-radius:10px; }
 
 /* ─────────────── SHELL — painéis flutuantes ─────────────── */
+/* Preencher a safe-area do iPhone com o fundo do sistema */
+.app-shell::after {
+  content:''; position:fixed; top:0; left:0; right:0;
+  height:env(safe-area-inset-top, 0px);
+  background:var(--bg);
+  z-index:9000;
+  pointer-events:none;
+}
 .app-shell { display:flex; min-height:100vh; }
 .app-main {
   flex:1; min-width:0;
@@ -1057,10 +1065,6 @@ input[type="date"].form-control, input[type="time"].form-control { color-scheme:
 
 /* ─────────────── Entrada de página ─────────────── */
 @keyframes pageIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
-.main-content > *:not(.modal-overlay):not(.notif-dropdown):not(script):not(style) { animation:pageIn .3s cubic-bezier(.34,1.2,.5,1) both; }
-.main-content > *:nth-child(2):not(.modal-overlay) { animation-delay:.04s; }
-.main-content > *:nth-child(3):not(.modal-overlay) { animation-delay:.08s; }
-.main-content > *:nth-child(4):not(.modal-overlay) { animation-delay:.12s; }
 .main-content > .modal-overlay { animation:none !important; }
 
 /* ─────────────── Responsivo ─────────────── */
@@ -1420,4 +1424,22 @@ select.fk-select-open { border-color:var(--yellow) !important; box-shadow:0 0 0 
   .sidebar, .topbar, .bottom-nav, .modal, .notif-dropdown, .fk-select-panel, .toast { background:var(--panel-solid); }
   .card, .dash-card, .table-wrap, .dash-kpi, .stat-card, .mot-card, .filtro-card,
   .table-card, .chart-card, .finance-card, .cal-grid-wrap, .cal-panel { background:var(--card-solid); }
+}
+
+
+/* ═══ Transição Apple entre telas ═══ */
+/* Interceptação em JS: ao clicar num link de navegação, 
+   a página sai (slideOut) e a nova entra (slideIn) */
+@keyframes fkPageOut {
+  from { opacity:1; transform:translateX(0) scale(1); }
+  to   { opacity:0; transform:translateX(-6%) scale(.97); }
+}
+@keyframes fkPageIn {
+  from { opacity:0; transform:translateX(4%) scale(.98); }
+  to   { opacity:1; transform:translateX(0) scale(1); }
+}
+.fk-page-out { animation:fkPageOut .22s ease both; pointer-events:none; }
+.fk-page-in  { animation:fkPageIn .25s cubic-bezier(.25,.1,.25,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .fk-page-out, .fk-page-in { animation:none !important; }
 }
