@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0D0E12">
 <link rel="apple-touch-icon" href="<?= APP_URL ?>/public/assets/img/logo-small.png">
 <link rel="icon" type="image/png" href="<?= APP_URL ?>/public/assets/img/logo-small.png">
@@ -29,7 +29,7 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 @media (prefers-reduced-motion:reduce){body::after{animation:none}}
 @media (prefers-reduced-motion:reduce){body::before{animation:none}}
 
-.topbar{position:fixed;top:10px;left:12px;right:12px;z-index:999;height:58px;
+.topbar{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;z-index:999;height:58px;
   background:linear-gradient(180deg,rgba(255,255,255,.045),transparent 55%),var(--panel);
   backdrop-filter:saturate(170%) blur(22px);-webkit-backdrop-filter:saturate(170%) blur(22px);
   border:1px solid var(--border2);border-radius:18px;
@@ -47,7 +47,7 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 .t-bell-dot{position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--yellow);border:2px solid #14161C;display:none;}
 .t-av{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,#FFE14D,var(--yellow) 55%,#E8B400);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#000;font-family:'Sora',sans-serif;box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 4px 12px rgba(255,214,0,.25);}
 
-.main{padding-top:84px;padding-bottom:96px;min-height:100vh;}
+.main{padding-top:calc(84px + env(safe-area-inset-top,0px));padding-bottom:96px;min-height:100vh;}
 
 .hero{padding:20px 16px 16px;background:linear-gradient(180deg,rgba(255,214,0,.04),transparent);border-bottom:1px solid var(--border);}
 .hero-time{font-size:11px;color:var(--text2);margin-bottom:4px;}

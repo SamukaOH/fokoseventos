@@ -69,6 +69,7 @@
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 html { font-size:16px; scrollbar-gutter:stable; }
 body {
+  padding-top:env(safe-area-inset-top, 0);
   font-family:var(--font);
   font-size:13.5px; line-height:1.55;
   background:var(--bg);
@@ -134,7 +135,7 @@ button, input, select, textarea { font-family:var(--font); }
 /* ─────────────── SIDEBAR — painel flutuante destacado ─────────────── */
 .sidebar {
   position:fixed; z-index:300;
-  top:var(--gap-shell); left:var(--gap-shell); bottom:var(--gap-shell);
+  top:calc(var(--gap-shell) + env(safe-area-inset-top, 0px)); left:var(--gap-shell); bottom:var(--gap-shell);
   width:var(--sidebar-w);
   background:var(--panel);
   border:1px solid var(--border);
@@ -235,7 +236,7 @@ button, input, select, textarea { font-family:var(--font); }
 
 /* ─────────────── TOPBAR — transparente, fundida ao conteúdo ─────────────── */
 .topbar {
-  position:sticky; top:var(--gap-shell); z-index:200;
+  position:sticky; top:calc(var(--gap-shell) + env(safe-area-inset-top, 0px)); z-index:200;
   height:64px;
   display:flex; align-items:center; gap:14px;
   padding:0 10px 0 20px;

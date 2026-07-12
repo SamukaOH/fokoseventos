@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="apple-touch-icon" href="<?= APP_URL ?>/public/assets/img/logo-small.png">
 <link rel="icon" type="image/png" href="<?= APP_URL ?>/public/assets/img/logo-small.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Login — Fokos Eventos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
