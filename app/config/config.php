@@ -6,10 +6,16 @@
 define('APP_NAME',    'Fokos Eventos');
 define('APP_VERSION', '7.0.1');
 
-// URL: usa APP_URL do ambiente (Railway) ou o domínio público da Railway; fallback XAMPP
+// URL: detecta automaticamente em produção (Railway), ou usa APP_URL do ambiente, ou fallback XAMPP
 $envUrl = getenv('APP_URL');
 if (!$envUrl && getenv('RAILWAY_PUBLIC_DOMAIN')) {
     $envUrl = 'https://' . getenv('RAILWAY_PUBLIC_DOMAIN');
+}
+if (!$envUrl && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== 'localhost') {
+    $proto = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+             (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+             ? 'https' : 'http';
+    $envUrl = $proto . '://' . $_SERVER['HTTP_HOST'];
 }
 define('APP_URL', rtrim($envUrl ?: 'http://localhost/fokos', '/'));
 
