@@ -122,13 +122,14 @@ button, input, select, textarea { font-family:var(--font); }
 :focus-visible { box-shadow:var(--ring) !important; border-radius:10px; }
 
 /* ─────────────── SHELL — painéis flutuantes ─────────────── */
-/* Preencher a safe-area do iPhone com o fundo do sistema */
-.app-shell::after {
-  content:''; position:fixed; top:0; left:0; right:0;
-  height:env(safe-area-inset-top, 0px);
-  background:var(--bg);
-  z-index:9000;
-  pointer-events:none;
+/* Safe-area: preenche e garante que o topbar fica ABAIXO do notch */
+@media all and (display-mode: standalone) {
+  .topbar {
+    top:calc(var(--gap-shell) + env(safe-area-inset-top, 0px) + 6px) !important;
+    margin-top:calc(var(--gap-shell) + env(safe-area-inset-top, 0px) + 6px) !important;
+  }
+  .sidebar { top:calc(var(--gap-shell) + env(safe-area-inset-top, 0px)) !important; }
+  .main-content { padding-top:calc(22px + env(safe-area-inset-top, 0px)) !important; }
 }
 .app-shell { display:flex; min-height:100vh; }
 .app-main {
@@ -1134,12 +1135,13 @@ input[type="date"].form-control, input[type="time"].form-control { color-scheme:
 
   .modal-overlay { padding:0; align-items:flex-end; }
   .modal {
-    max-width:100%; max-height:92vh;
+    max-width:100%; max-height:82dvh; max-height:82vh;
     border-radius:24px 24px 0 0;
     border-left:none; border-right:none; border-bottom:none;
     animation:sheetIn .26s cubic-bezier(.34,1.35,.5,1);
+    margin-bottom:calc(74px + env(safe-area-inset-bottom, 0px));
   }
-  .modal-footer { padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px)); }
+  .modal-footer { padding-bottom:14px; }
 
   .kanban-col { width:262px; }
   .letras-grid { grid-template-columns:repeat(auto-fill, minmax(58px,1fr)); gap:7px; padding:10px; }
@@ -1427,19 +1429,16 @@ select.fk-select-open { border-color:var(--yellow) !important; box-shadow:0 0 0 
 }
 
 
-/* ═══ Transição Apple entre telas ═══ */
-/* Interceptação em JS: ao clicar num link de navegação, 
-   a página sai (slideOut) e a nova entra (slideIn) */
-@keyframes fkPageOut {
-  from { opacity:1; transform:translateX(0) scale(1); }
-  to   { opacity:0; transform:translateX(-6%) scale(.97); }
+/* ═══ Transição Apple — cross-fade suave com zoom micro ═══ */
+@keyframes fkOut {
+  to { opacity:0; transform:scale(.985); filter:blur(2px); }
 }
-@keyframes fkPageIn {
-  from { opacity:0; transform:translateX(4%) scale(.98); }
-  to   { opacity:1; transform:translateX(0) scale(1); }
+@keyframes fkIn {
+  from { opacity:0; transform:scale(1.008); }
+  to   { opacity:1; transform:scale(1); }
 }
-.fk-page-out { animation:fkPageOut .22s ease both; pointer-events:none; }
-.fk-page-in  { animation:fkPageIn .25s cubic-bezier(.25,.1,.25,1) both; }
+.fk-page-out { animation:fkOut .18s ease both; pointer-events:none; }
+.fk-page-in  { animation:fkIn .32s cubic-bezier(.2,0,.4,1) both; }
 @media (prefers-reduced-motion: reduce) {
   .fk-page-out, .fk-page-in { animation:none !important; }
 }

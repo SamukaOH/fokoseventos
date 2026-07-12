@@ -240,6 +240,12 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 .fk-transition .fk-bar::after{content:'';position:absolute;top:0;bottom:0;left:-40%;width:40%;border-radius:3px;background:linear-gradient(90deg,transparent,var(--yellow),transparent);animation:fkBar 1s cubic-bezier(.4,0,.2,1) infinite;}
 @keyframes fkBar{to{left:100%}}
 .fk-transition .fk-txt{font-family:'Sora',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.22em;color:#5C6170;}
+
+@media all and (display-mode: standalone) {
+  .topbar { top:calc(14px + env(safe-area-inset-top,0px)) !important; }
+  .main { padding-top:calc(88px + env(safe-area-inset-top,0px)) !important; }
+  .notif-panel { top:calc(82px + env(safe-area-inset-top,0px)) !important; }
+}
 </style>
 </head>
 <body>

@@ -340,32 +340,29 @@ document.addEventListener('click', function(e) {
 
 // ═══════════ Transição Apple entre páginas ═══════════
 (function(){
-  var pages = ['dashboard','demandas','estoque','financeiro','motoristas',
-               'calendario','clientes','relatorios','usuarios','logs'];
+  // Standalone: adicionar classe pro CSS detectar
+  if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+    document.documentElement.classList.add('standalone');
+  }
+
   document.addEventListener('click', function(e){
     var a = e.target.closest && e.target.closest('a[href]');
     if (!a) return;
     var href = a.getAttribute('href');
     if (!href || href.startsWith('#') || href.startsWith('javascript') || a.target === '_blank') return;
-    // Só animar navegação interna entre páginas
-    var isPage = pages.some(function(p){ return href.endsWith('/'+p) || href === APP_URL+'/'+p; });
-    var isBnav = a.closest('.bottom-nav, .bnav-item, .nav-item');
-    if (!isPage && !isBnav) return;
-    // Verificar se é link para mesma página
-    if (href === window.location.href || href === window.location.pathname) return;
+    // Interceptar navegação interna (sidebar, bottom-nav, links do sistema)
+    var isInternal = a.closest('.nav-item, .bottom-nav, .bnav-item') ||
+                     (href.indexOf(APP_URL) === 0 && !href.match(/\.(php|jpg|png|css|js)/));
+    if (!isInternal) return;
+    if (href === window.location.href) return;
     e.preventDefault();
     var mc = document.querySelector('.main-content');
     if (!mc) { window.location.href = href; return; }
     mc.classList.add('fk-page-out');
-    setTimeout(function(){
-      window.location.href = href;
-    }, 180);
+    setTimeout(function(){ window.location.href = href; }, 160);
   });
-  // Entrada: animar o conteúdo ao carregar
-  window.addEventListener('DOMContentLoaded', function(){
-    var mc = document.querySelector('.main-content');
-    if (mc && !mc.classList.contains('fk-page-out')) {
-      mc.classList.add('fk-page-in');
-    }
-  });
+
+  // Entrada suave
+  var mc = document.querySelector('.main-content');
+  if (mc) mc.classList.add('fk-page-in');
 })();
