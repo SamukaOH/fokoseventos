@@ -6,11 +6,16 @@
 // ---- Inicialização segura de sessão ----
 function startSession(): void {
     if (session_status() === PHP_SESSION_NONE) {
+        // Detectar HTTPS (direto ou via proxy da Railway)
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+              || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+              || (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on');
+
         session_name(SESSION_NAME);
         session_set_cookie_params([
             'lifetime' => SESSION_LIFETIME,
             'path'     => '/',
-            'secure'   => false,
+            'secure'   => $https,
             'httponly' => true,
             'samesite' => 'Lax'
         ]);

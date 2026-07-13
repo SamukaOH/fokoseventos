@@ -9,7 +9,7 @@ COPY docker/php.ini /usr/local/etc/php/conf.d/fokos.ini
 
 COPY . /var/www/html
 WORKDIR /var/www/html
-RUN mkdir -p public/uploads && chown -R www-data:www-data public/uploads
+RUN chmod 1777 /tmp && mkdir -p public/uploads && chown -R www-data:www-data public/uploads
 
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
