@@ -17,6 +17,12 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" href="<?= APP_URL ?>/public/assets/css/app-v72.css?v=<?= APP_VERSION ?>">
 <script src="<?= APP_URL ?>/public/assets/vendor/chart.umd.min.js?v=<?= APP_VERSION ?>"></script>
+<script>
+// Fallback: se o Chart.js local não carregou, tenta CDNs alternativos (síncrono)
+if (typeof Chart === 'undefined') {
+  document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"><\/script>');
+}
+</script>
 <script src="<?= APP_URL ?>/public/assets/vendor/chartjs-plugin-datalabels.min.js?v=<?= APP_VERSION ?>"></script>
 </head>
 <body>
