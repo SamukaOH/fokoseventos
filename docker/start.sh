@@ -1,6 +1,7 @@
-#!/bin/sh
-# Railway: porta dinâmica + inicialização
-echo "=== FOKOS START v7.3.9 ==="
-sed -i "s/NGINX_PORT/${PORT:-8080}/g" /etc/nginx/http.d/default.conf
-php-fpm -D
-exec nginx -g "daemon off;"
+#!/bin/bash
+set -e
+# Railway injeta $PORT — Apache escuta nela
+PORT="${PORT:-8080}"
+sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf
+sed -i "s/:80>/:${PORT}>/" /etc/apache2/sites-available/000-default.conf
+exec apache2-foreground

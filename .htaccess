@@ -1,6 +1,16 @@
 Options -Indexes
 RewriteEngine On
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+# Arquivos e pastas reais servidos direto (CSS, JS, imagens)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Todo o resto vai pro index.php
+RewriteRule ^ index.php [L]
+
+# MIME types corretos
+<IfModule mod_mime.c>
+  AddType text/css .css
+  AddType application/javascript .js
+</IfModule>

@@ -262,7 +262,7 @@ async function carregarDados() {
   else                 params += '&ano='+document.getElementById('filtro-ano').value;
 
   try {
-    var r = await fetch(APP_URL+'/fin.php?acao=lista&'+params, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+    var r = await fetch(APP_URL+'/api/financeiro?'+params, {headers:{'X-Requested-With':'XMLHttpRequest'}});
     if (!r.ok) throw new Error('HTTP '+r.status);
     var json = await safeJson(r);
     if (json.erro) throw new Error(json.erro);
@@ -457,7 +457,7 @@ async function calcularOrcamento() {
   var id = document.getElementById('lan-demanda').value;
   if (!id) return;
   try {
-    var r = await fetch(APP_URL+'/fin.php?acao=orcamento&id='+id, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+    var r = await fetch(APP_URL+'/api/financeiro/orcamento/'+id, {headers:{'X-Requested-With':'XMLHttpRequest'}});
     var data = await safeJson(r);
     if (data.erro) { alert(data.erro); return; }
     var linhas = data.linhas || [];
@@ -515,7 +515,7 @@ async function salvarLancamento() {
   fd.append('status',         document.getElementById('lan-status').value);
   fd.append('orcamento_auto', document.getElementById('linhas-orcamento').style.display!=='none'?1:0);
   try {
-    var r = await fetch(APP_URL+'/fin-post.php?acao=criar', {method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
+    var r = await fetch(APP_URL+'/api/financeiro', {method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
     var data = await safeJson(r);
     if (data.sucesso) {
       Modal.close('modal-lancamento');
@@ -546,7 +546,7 @@ async function deletarLan(id) {
   if (!confirm('Excluir este lançamento?')) return;
   var fd = new FormData(); fd.append('_csrf',CSRF);
   try {
-    var r = await fetch(APP_URL+'/fin-post.php?acao=delete&id='+id,{method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
+    var r = await fetch(APP_URL+'/api/financeiro/'+id+'/delete',{method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
     var data = await safeJson(r);
     if (data.sucesso) { Toast.success('Removido!'); carregarDados(); }
   } catch(e) {}
@@ -554,7 +554,7 @@ async function deletarLan(id) {
 
 async function carregarPrecos() {
   try {
-    var r = await fetch(APP_URL+'/fin.php?acao=precos',{headers:{'X-Requested-With':'XMLHttpRequest'}});
+    var r = await fetch(APP_URL+'/api/financeiro/precos',{headers:{'X-Requested-With':'XMLHttpRequest'}});
     var data = await safeJson(r);
     var lista = data.precos||[];
     var html = lista.length
@@ -575,7 +575,7 @@ async function salvarPreco(id) {
   var fd = new FormData(); fd.append('_csrf',CSRF);
   fd.append('preco_unitario', document.getElementById('preco-'+id).value);
   try {
-    var r = await fetch(APP_URL+'/fin-post.php?acao=preco&id='+id,{method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
+    var r = await fetch(APP_URL+'/api/financeiro/precos/'+id,{method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}});
     var data = await safeJson(r);
     if (data.sucesso) Toast.success('Preço atualizado!');
   } catch(e) {}
