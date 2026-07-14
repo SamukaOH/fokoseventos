@@ -343,7 +343,7 @@ function verLancamento(id) {
 
 var pizzaInst = null;
 function renderPizza() {
-  if (typeof Chart === 'undefined') { return; }
+  if (typeof Chart === 'undefined') { setTimeout(renderPizza, 200); return; }
   var evo = DADOS.evolucao || [];
   var canvas = document.getElementById('chart-pizza');
   if (!canvas) return;
@@ -407,7 +407,7 @@ function renderPizza() {
 }
 
 function renderGrafico() {
-  if (typeof Chart === 'undefined') { console.warn('Chart.js indisponível'); return; }
+  if (typeof Chart === 'undefined') { setTimeout(renderGrafico, 200); return; }
   var evo = DADOS.evolucao || [];
   if (chartInst) chartInst.destroy();
   var ctx = document.getElementById('chart-evolucao').getContext('2d');

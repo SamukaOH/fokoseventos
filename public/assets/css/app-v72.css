@@ -1080,7 +1080,7 @@ input[type="date"].form-control, input[type="time"].form-control { color-scheme:
 
 @media (max-width: 768px) {
   :root { --gap-shell:10px; }
-  .main-content { padding:calc(76px + env(safe-area-inset-top, 0px)) 12px calc(100px + env(safe-area-inset-bottom, 0px)); }
+  .main-content { padding:calc(86px + env(safe-area-inset-top, 0px)) 12px calc(100px + env(safe-area-inset-bottom, 0px)); }
   /* Topbar mobile: barra sólida colada; conteúdo ABAIXO da safe-area */
   .topbar {
     position:fixed !important;
@@ -1091,8 +1091,8 @@ input[type="date"].form-control, input[type="time"].form-control { color-scheme:
     border-bottom:1px solid rgba(255,255,255,.07) !important;
     height:auto !important;
     min-height:52px !important;
-    padding-top:calc(env(safe-area-inset-top, 0px) + 8px) !important;
-    padding-bottom:8px !important;
+    padding-top:calc(env(safe-area-inset-top, 0px) + 18px) !important;
+    padding-bottom:12px !important;
     padding-left:14px !important; padding-right:8px !important;
     background:#0D0E12 !important;
     box-shadow:none !important;
