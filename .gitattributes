@@ -1,0 +1,28 @@
+# Forçar LF (Unix) em TODOS os arquivos — CRLF do Windows quebra
+# shell scripts, nginx.conf e Dockerfile no container Linux da Railway.
+* text=auto eol=lf
+
+# Explícito para os arquivos críticos do deploy:
+*.sh    text eol=lf
+*.conf  text eol=lf
+*.ini   text eol=lf
+*.php   text eol=lf
+*.css   text eol=lf
+*.js    text eol=lf
+*.json  text eol=lf
+*.sql   text eol=lf
+Dockerfile text eol=lf
+.htaccess  text eol=lf
+
+# Binários: não tocar
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pdf binary
+*.zip binary
