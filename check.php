@@ -1,32 +1,36 @@
 <?php
+$key = getenv('SETUP_KEY');
 require_once __DIR__ . '/app/config/config.php';
 header('Content-Type: text/plain; charset=utf-8');
 header('Cache-Control: no-store');
 
-echo "VERSAO NO AR: " . APP_VERSION . "\n";
-echo "(se não for 7.3.0, o fix ainda não subiu)\n\n";
+echo "VERSAO: " . APP_VERSION . "\n\n";
 
-echo "APP_URL: " . APP_URL . "\n\n";
+// Chamar a API real internamente com o cookie de sessão do browser
+$cookie = '';
+foreach ($_COOKIE as $k=>$v) $cookie .= "$k=$v; ";
 
-// Simular o parsing do URI para /api/financeiro
-$_test = '/api/financeiro';
-$basePath = rtrim(parse_url(APP_URL, PHP_URL_PATH) ?? '', '/');
-$reqPath = $_test;
-if ($basePath !== '' && strpos($reqPath, $basePath) === 0) {
-    $uri = substr($reqPath, strlen($basePath)) ?: '/';
-} else {
-    $uri = $reqPath ?: '/';
-}
-if ($uri === '' || $uri[0] !== '/') $uri = '/' . $uri;
+$port = $_SERVER['SERVER_PORT'] ?? '8080';
+$url = "http://127.0.0.1:$port/api/financeiro?modo=mensal&mes=" . date('Y-m');
 
-echo "TESTE DE ROTEAMENTO:\n";
-echo "  Request: /api/financeiro\n";
-echo "  basePath extraído: [" . $basePath . "]\n";
-echo "  URI final que o router recebe: [" . $uri . "]\n\n";
+$ctx = stream_context_create(['http' => [
+    'method' => 'GET',
+    'header' => "X-Requested-With: XMLHttpRequest\r\nCookie: $cookie\r\n",
+    'ignore_errors' => true,
+    'timeout' => 10,
+]]);
+$resp = @file_get_contents($url, false, $ctx);
+$status = $http_response_header[0] ?? '?';
+$ctype = '';
+foreach ($http_response_header ?? [] as $h) if (stripos($h,'content-type')===0) $ctype=$h;
 
-if ($uri === '/api/financeiro') {
-    echo "✓ CORRETO — vai chamar lista() (JSON)\n";
-} else {
-    echo "✗ BUG — vai chamar a rota errada e retornar HTML\n";
-    echo "  Este é o problema. Precisa subir a versão 7.3.0.\n";
-}
+echo "API /api/financeiro:\n";
+echo "  Status: $status\n";
+echo "  $ctype\n";
+echo "  Resposta (200 chars): " . substr($resp ?: '(vazia)',0,200) . "\n\n";
+echo "  É JSON? " . (json_decode($resp)!==null ? "SIM ✓ — FINANCEIRO OK!" : "NÃO ✗") . "\n\n";
+
+// Diagnóstico de sessão nesta chamada interna
+echo "NOTA: esta chamada interna NÃO tem sua sessão real do browser,\n";
+echo "então pode dar 'sessão expirada' — isso é esperado aqui.\n";
+echo "O que importa: o Content-Type é JSON (não text/html).\n";
