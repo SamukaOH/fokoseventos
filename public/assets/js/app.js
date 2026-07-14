@@ -72,11 +72,19 @@ var Toast = {
 var Modal = {
   open(id) {
     var el = document.getElementById(id);
-    if (el) { el.classList.add('open'); el.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    if (!el) return;
+    // Mover para o <body> — escapa de qualquer contexto de empilhamento
+    // (main-content com transform prendia o modal atrás do dock)
+    if (el.parentNode !== document.body) document.body.appendChild(el);
+    el.classList.add('open'); el.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('modal-open');
   },
   close(id) {
     var el = document.getElementById(id);
-    if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+    if (el) { el.classList.remove('open'); }
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
   },
   confirm(title, msg, cb) {
     var id = 'modal-confirm-'+Date.now();

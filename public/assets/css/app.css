@@ -1462,3 +1462,10 @@ select.fk-select-open { border-color:var(--yellow) !important; box-shadow:0 0 0 
 @media (prefers-reduced-motion: reduce) {
   .fk-page-out, .fk-page-in { animation:none !important; }
 }
+
+
+/* Modal aberto: esconder o dock (evita competir com o modal) */
+body.modal-open .bottom-nav { opacity:0; pointer-events:none; transition:opacity .2s; }
+
+/* Modal sempre no topo absoluto */
+.modal-overlay { z-index:99999 !important; }
