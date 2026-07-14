@@ -15,7 +15,7 @@
 <title><?= APP_NAME ?> — Sistema ERP</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="<?= APP_URL ?>/public/assets/css/app.css?v=<?= APP_VERSION ?>">
+<link rel="stylesheet" href="<?= APP_URL ?>/public/assets/css/app-v72.css?v=<?= APP_VERSION ?>">
 </head>
 <body>
 
