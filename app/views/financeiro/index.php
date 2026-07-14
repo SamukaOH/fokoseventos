@@ -238,11 +238,22 @@ function setTipo(t) {
   document.getElementById('btn-tipo-despesa').classList.toggle('active', t==='despesa');
 }
 
-// Helper: parseia JSON ou recarrega se a sessão expirou
+// Helper: parseia JSON; se sessão expirou, vai pro login (sem loop de reload)
 async function safeJson(r) {
-  var ct = r.headers.get('content-type') || '';
-  if (!ct.includes('json')) { location.reload(); throw new Error('sessao'); }
-  return r.json();
+  var txt = await r.text();
+  var json;
+  try { json = JSON.parse(txt); }
+  catch(e) {
+    // Resposta não-JSON = provavelmente HTML de login. Ir pro login uma vez.
+    window.location.href = APP_URL + '/';
+    throw new Error('redirect-login');
+  }
+  // Sessão expirada explícita
+  if (json && json.redirect && json.erro && json.erro.toLowerCase().indexOf('sess') >= 0) {
+    window.location.href = json.redirect;
+    throw new Error('redirect-login');
+  }
+  return json;
 }
 
 async function carregarDados() {
@@ -264,7 +275,7 @@ async function carregarDados() {
     renderDemandas(DADOS.demandas||[]);
     carregarPrecos();
   } catch(e) {
-    if(e && e.message && e.message.includes('Unexpected token')) { console.warn('Financeiro: sessão expirada ou resposta inválida — recarregando...'); location.reload(); return; }
+    if(e && e.message === 'redirect-login') return;
     console.error('Financeiro erro:', e);
     document.getElementById('fin-tabela').innerHTML = '<div style="padding:40px;text-align:center;color:#ff3b30"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao carregar: '+e.message+'</div>';
   }
