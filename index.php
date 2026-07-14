@@ -213,7 +213,6 @@ $tamsPHP   = Database::fetchAll("SELECT * FROM letreiros_tamanhos ORDER BY altur
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 var MODO     = 'mensal';
 var DADOS    = {};
@@ -370,6 +369,9 @@ function renderPizza() {
       c.restore();
     }
   };
+  if (typeof ChartDataLabels !== 'undefined' && typeof Chart !== 'undefined') {
+    try { Chart.register(ChartDataLabels); } catch(e){}
+  }
   pizzaInst = new Chart(canvas.getContext('2d'), {
     type:'doughnut',
     data:{ labels:['Receitas','Despesas'],
@@ -377,7 +379,7 @@ function renderPizza() {
         backgroundColor:['#3DDC84','#FF5C51'], hoverBackgroundColor:['#5FE79D','#FF7A71'],
         borderColor:'#171922', borderWidth:4, borderRadius:10, hoverOffset:6 }]
     },
-    plugins:[ChartDataLabels, centro],
+    plugins:(typeof ChartDataLabels!=='undefined'?[ChartDataLabels, centro]:[centro]),
     options:{
       responsive:true, maintainAspectRatio:true, cutout:'64%',
       devicePixelRatio: Math.max(window.devicePixelRatio || 1, 2),
