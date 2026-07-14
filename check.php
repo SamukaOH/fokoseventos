@@ -2,34 +2,27 @@
 require_once __DIR__ . '/app/config/config.php';
 header('Content-Type: text/plain; charset=utf-8');
 header('Cache-Control: no-store');
-echo "VERSAO: " . APP_VERSION . "\n\n";
+echo "VERSAO: " . APP_VERSION . "\n";
+echo "(precisa ser 7.3.6+ pro debug funcionar)\n\n";
 
+// Chamar /api/financeiro?__debug=1 internamente
 $port = $_SERVER['SERVER_PORT'] ?? '8080';
-$base = "http://127.0.0.1:$port";
+$ctx = stream_context_create(['http'=>['timeout'=>8,'ignore_errors'=>true]]);
 
-function get($url) {
-    $ctx = stream_context_create(['http'=>['timeout'=>8,'ignore_errors'=>true,'header'=>"X-Requested-With: XMLHttpRequest\r\n"]]);
-    $r = @file_get_contents($url, false, $ctx);
-    $status = $http_response_header[0] ?? '?';
-    $ct = '';
-    foreach ($http_response_header ?? [] as $h) if (stripos($h,'content-type')===0) $ct=trim($h);
-    return [$status, $ct, $r];
+echo "=== /api/financeiro?__debug=1 ===\n";
+$r = @file_get_contents("http://127.0.0.1:$port/api/financeiro?__debug=1", false, $ctx);
+$ct='';foreach($http_response_header??[] as $h) if(stripos($h,'content-type')===0)$ct=$h;
+echo "Content-Type: $ct\n";
+echo "Resposta:\n$r\n\n";
+
+echo "INTERPRETAÇÃO:\n";
+if (strpos($r,'uri_final') !== false) {
+    echo "✓ index.php executou o debug. Veja 'uri_final' acima.\n";
+    echo "  Se uri_final != /api/financeiro → achamos o bug do parsing.\n";
+} elseif (strpos($r,'FINANCEIRO') !== false) {
+    echo "✗ Retornou a VIEW. O index.php NÃO está processando /api/financeiro.\n";
+    echo "  Isso significa que o Nginx serve /api/financeiro de forma errada,\n";
+    echo "  OU o parsing do URI está mandando pra rota /financeiro.\n";
+} else {
+    echo "? Resposta inesperada.\n";
 }
-
-echo "1. CSS (app-v72.css):\n";
-[$s,$ct,$r] = get("$base/public/assets/css/app-v72.css");
-echo "   $s | $ct | " . strlen($r??'') . " bytes\n";
-echo "   Começa com: " . substr(trim($r??''),0,40) . "\n\n";
-
-echo "2. JS (app.js):\n";
-[$s,$ct,$r] = get("$base/public/assets/js/app.js");
-echo "   $s | $ct | " . strlen($r??'') . " bytes\n\n";
-
-echo "3. API financeiro:\n";
-[$s,$ct,$r] = get("$base/api/financeiro?modo=mensal&mes=".date('Y-m'));
-echo "   $s | $ct\n";
-echo "   " . substr(trim($r??''),0,60) . "\n\n";
-
-echo "DIAGNÓSTICO:\n";
-echo "- Se CSS vier 404 ou com HTML → Nginx não serve estáticos (causa da tela sem estilo)\n";
-echo "- Se API vier text/html → roteamento ainda quebrado\n";
