@@ -25,4 +25,9 @@ echo json_encode([
     'save_path'      => session_save_path() ?: ini_get('session.save_path'),
     'save_writable'  => is_writable(session_save_path() ?: sys_get_temp_dir()),
     'app_url'        => APP_URL,
+    'tabela_sessions_existe' => (function(){
+        try { Database::query('SELECT 1 FROM sessions LIMIT 1'); return 'SIM'; }
+        catch (\Throwable $e) { return 'NAO — rode migrate.php! (' . $e->getMessage() . ')'; }
+    })(),
+    'handler_ativo' => session_module_name(),
 ], JSON_PRETTY_PRINT);
