@@ -6,6 +6,13 @@
 // ---- Inicialização segura de sessão ----
 function startSession(): void {
     if (session_status() === PHP_SESSION_NONE) {
+        // Garantir diretório de sessão gravável
+        $sessDir = sys_get_temp_dir() . '/fokos_sessions';
+        if (!is_dir($sessDir)) @mkdir($sessDir, 0777, true);
+        if (is_dir($sessDir) && is_writable($sessDir)) {
+            session_save_path($sessDir);
+        }
+
         // Detectar HTTPS (direto ou via proxy da Railway)
         $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
               || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
